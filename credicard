@@ -1,0 +1,47 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset (replace with the correct path to the dataset)
+data = pd.read_csv('creditcard.csv')
+
+# Check for missing values and data overview
+print(data.isnull().sum())
+print(data.describe())
+
+# Feature selection: 'Class' is the target variable for fraud detection (1 for fraud, 0 for non-fraud)
+X = data.drop('Class', axis=1)  # Features
+y = data['Class']               # Target variable (fraud or not)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize the feature set for better performance
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Initialize and train the Random Forest classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train_scaled, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test_scaled)
+
+# Evaluate the model
+print('Classification Report:\n', classification_report(y_test, y_pred))
+print('Confusion Matrix:\n', confusion_matrix(y_test, y_pred))
+
+# Plot feature importance (optional, to visualize which features are most important)
+feature_importances = model.feature_importances_
+plt.figure(figsize=(12,8))
+plt.barh(X.columns, feature_importances)
+plt.xlabel('Feature Importance')
+plt.ylabel('Feature')
+plt.title('Feature Importance for Fraud Detection')
+plt.show()
